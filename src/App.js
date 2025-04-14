@@ -28,6 +28,41 @@ class App extends Component {
     };
   }
 
+  async componentDidMount() {
+    try {
+      const creditsResponse = await fetch("https://johnnylaicode.github.io/api/credits.json");
+      const credits = await creditsResponse.json();
+  
+      const debitsResponse = await fetch("https://johnnylaicode.github.io/api/debits.json");
+      const debits = await debitsResponse.json();
+  
+      const totalCredits = credits.reduce((sum, item) => sum + item.amount, 0);
+      const totalDebits = debits.reduce((sum, item) => sum + item.amount, 0);
+      const accountBalance = parseFloat((totalCredits - totalDebits).toFixed(2));
+  
+      this.setState({ credits, debits, accountBalance });
+    } catch (error) {
+      console.error("Failed to fetch credits or debits:", error);
+    }
+  }
+
+  addCredit = (newCredit) => {
+    const updatedCredits = [...this.state.credits, newCredit];
+    const totalCredits = updatedCredits.reduce((sum, c) => sum + c.amount, 0);
+    const totalDebits = this.state.debits.reduce((sum, d) => sum + d.amount, 0);
+    const accountBalance = parseFloat((totalCredits - totalDebits).toFixed(2));
+    this.setState({ credits: updatedCredits, accountBalance });
+  }
+  
+  addDebit = (newDebit) => {
+    const updatedDebits = [...this.state.debits, newDebit];
+    const totalCredits = this.state.credits.reduce((sum, c) => sum + c.amount, 0);
+    const totalDebits = updatedDebits.reduce((sum, d) => sum + d.amount, 0);
+    const accountBalance = parseFloat((totalCredits - totalDebits).toFixed(2));
+    this.setState({ debits: updatedDebits, accountBalance });
+  }
+  
+
   // Update state's currentUser (userName) after "Log In" button is clicked
   mockLogIn = (logInInfo) => {  
     const newUser = {...this.state.currentUser};
@@ -43,8 +78,23 @@ class App extends Component {
       <UserProfile userName={this.state.currentUser.userName} memberSince={this.state.currentUser.memberSince} />
     )
     const LogInComponent = () => (<LogIn user={this.state.currentUser} mockLogIn={this.mockLogIn} />)
-    const CreditsComponent = () => (<Credits credits={this.state.creditList} />) 
-    const DebitsComponent = () => (<Debits debits={this.state.debitList} />) 
+
+    const CreditsComponent = () => (
+      <Credits 
+        credits={this.state.credits} 
+        addCredit={this.addCredit}
+        accountBalance={this.state.accountBalance}
+      />
+    );
+
+
+    const DebitsComponent = () => (
+      <Debits 
+        debits={this.state.debits} 
+        addDebit={this.addDebit}
+        accountBalance={this.state.accountBalance}
+      />
+    );
 
     // Important: Include the "basename" in Router, which is needed for deploying the React app to GitHub Pages
     return (
