@@ -30,36 +30,32 @@ class App extends Component {
 
   async componentDidMount() {
     try {
-      const creditsResponse = await fetch("https://johnnylaicode.github.io/api/credits.json");
-      const credits = await creditsResponse.json();
+      const creditsResponse = await fetch("https://moj-api.herokuapp.com/credits");
+      const debitsResponse = await fetch("https://moj-api.herokuapp.com/debits");
   
-      const debitsResponse = await fetch("https://johnnylaicode.github.io/api/debits.json");
-      const debits = await debitsResponse.json();
+      const creditList = await creditsResponse.json();
+      const debitList = await debitsResponse.json();
   
-      const totalCredits = credits.reduce((sum, item) => sum + item.amount, 0);
-      const totalDebits = debits.reduce((sum, item) => sum + item.amount, 0);
-      const accountBalance = parseFloat((totalCredits - totalDebits).toFixed(2));
+      const creditTotal = creditList.reduce((sum, item) => sum + item.amount, 0);
+      const debitTotal = debitList.reduce((sum, item) => sum + item.amount, 0);
+      const accountBalance = creditTotal - debitTotal;
   
-      this.setState({ credits, debits, accountBalance });
+      this.setState({ creditList, debitList, accountBalance });
     } catch (error) {
-      console.error("Failed to fetch credits or debits:", error);
+      console.error("Error fetching data:", error);
     }
   }
 
-  addCredit = (newCredit) => {
-    const updatedCredits = [...this.state.credits, newCredit];
-    const totalCredits = updatedCredits.reduce((sum, c) => sum + c.amount, 0);
-    const totalDebits = this.state.debits.reduce((sum, d) => sum + d.amount, 0);
-    const accountBalance = parseFloat((totalCredits - totalDebits).toFixed(2));
-    this.setState({ credits: updatedCredits, accountBalance });
+  addCredit = (credit) => {
+    const updatedCredits = [...this.state.creditList, credit];
+    const newBalance = this.state.accountBalance + credit.amount;
+    this.setState({ creditList: updatedCredits, accountBalance: newBalance });
   }
   
-  addDebit = (newDebit) => {
-    const updatedDebits = [...this.state.debits, newDebit];
-    const totalCredits = this.state.credits.reduce((sum, c) => sum + c.amount, 0);
-    const totalDebits = updatedDebits.reduce((sum, d) => sum + d.amount, 0);
-    const accountBalance = parseFloat((totalCredits - totalDebits).toFixed(2));
-    this.setState({ debits: updatedDebits, accountBalance });
+  addDebit = (debit) => {
+    const updatedDebits = [...this.state.debitList, debit];
+    const newBalance = this.state.accountBalance - debit.amount;
+    this.setState({ debitList: updatedDebits, accountBalance: newBalance });
   }
   
 
@@ -81,7 +77,7 @@ class App extends Component {
 
     const CreditsComponent = () => (
       <Credits 
-        credits={this.state.credits} 
+        credits={this.state.creditList} 
         addCredit={this.addCredit}
         accountBalance={this.state.accountBalance}
       />
@@ -90,7 +86,7 @@ class App extends Component {
 
     const DebitsComponent = () => (
       <Debits 
-        debits={this.state.debits} 
+        debits={this.state.debitList} 
         addDebit={this.addDebit}
         accountBalance={this.state.accountBalance}
       />

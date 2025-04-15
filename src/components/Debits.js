@@ -1,19 +1,28 @@
+/*==================================================
+src/components/Debits.js
+
+Displays debit transactions, shows account balance,
+and allows adding a new debit.
+==================================================*/
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-function Debits(props) {
+function Debits({ debits, addDebit, accountBalance }) {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
     const newDebit = {
-      id: Math.random().toString(36).substring(2, 9),
       description,
       amount: parseFloat(amount),
       date: new Date().toISOString(),
     };
-    props.addDebit(newDebit);
+
+    addDebit(newDebit);
+
+    // Clear form
     setDescription('');
     setAmount('');
   };
@@ -21,7 +30,7 @@ function Debits(props) {
   return (
     <div>
       <h1>Debits</h1>
-      <p><strong>Account Balance:</strong> ${props.accountBalance.toFixed(2)}</p>
+      <h3>Account Balance: ${accountBalance.toFixed(2)}</h3>
 
       <form onSubmit={handleSubmit}>
         <div>
@@ -30,32 +39,32 @@ function Debits(props) {
             type="text" 
             value={description} 
             onChange={(e) => setDescription(e.target.value)} 
-            required
+            required 
           />
         </div>
         <div>
           <label>Amount: </label>
           <input 
             type="number" 
-            step="0.01" 
+            step="0.01"
             value={amount} 
             onChange={(e) => setAmount(e.target.value)} 
-            required
+            required 
           />
         </div>
         <button type="submit">Add Debit</button>
       </form>
 
-      <h2>Debit Entries</h2>
+      <h2>Debit History:</h2>
       <ul>
-        {props.debits.map((debit) => (
-          <li key={debit.id}>
-            {debit.description} — ${debit.amount.toFixed(2)} on {new Date(debit.date).toLocaleDateString()}
+        {debits.map((debit, index) => (
+          <li key={index}>
+            <strong>{debit.description}</strong> - ${debit.amount.toFixed(2)} on {new Date(debit.date).toLocaleDateString()}
           </li>
         ))}
       </ul>
 
-      <Link to="/">Back to Home</Link>
+      <Link to="/">Return to Home</Link>
     </div>
   );
 }
