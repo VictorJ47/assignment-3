@@ -1,12 +1,9 @@
-/*==================================================
-src/components/LogIn.js
-
-Displays the login form and updates the user profile when logged in.
-==================================================*/
 import React, { useState } from 'react';
+import { Redirect } from 'react-router-dom';
 
 function LogIn({ user, mockLogIn }) {
   const [username, setUsername] = useState('');
+  const [redirect, setRedirect] = useState(false);
 
   const handleChange = (e) => {
     setUsername(e.target.value);
@@ -15,8 +12,12 @@ function LogIn({ user, mockLogIn }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     mockLogIn({ userName: username });
-    setUsername(''); // Clear the input after submitting
+    setRedirect(true); // trigger redirect after login
   };
+
+  if (redirect) {
+    return <Redirect to="/" />;
+  }
 
   return (
     <div>
